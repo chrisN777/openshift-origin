@@ -147,7 +147,7 @@ EOF
 # Create Azure Cloud Provider configuration Playbook for Master Config
 
 cat > /home/${SUDOUSER}/setup-azure-master.yml <<EOF
-#!/usr/bin/ansible-playbook 
+#!/usr/bin/ansible-playbook
 - hosts: masters
   gather_facts: no
   serial: 1
@@ -185,7 +185,7 @@ cat > /home/${SUDOUSER}/setup-azure-master.yml <<EOF
           "subscriptionID" : "{{ g_subscriptionId }}",
           "tenantID" : "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
-        } 
+        }
     notify:
     - restart origin-master-api
     - restart origin-master-controllers
@@ -217,9 +217,8 @@ cat > /home/${SUDOUSER}/setup-azure-master.yml <<EOF
 EOF
 
 # Create Azure Cloud Provider configuration Playbook for Node Config (Master Nodes)
-
 cat > /home/${SUDOUSER}/setup-azure-node-master.yml <<EOF
-#!/usr/bin/ansible-playbook 
+#!/usr/bin/ansible-playbook
 - hosts: masters
   serial: 1
   gather_facts: no
@@ -251,7 +250,7 @@ cat > /home/${SUDOUSER}/setup-azure-node-master.yml <<EOF
           "subscriptionID" : "{{ g_subscriptionId }}",
           "tenantID" : "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
-        } 
+        }
     notify:
     - restart origin-node
   - name: insert the azure disk config into the node
@@ -274,7 +273,7 @@ EOF
 # Create Azure Cloud Provider configuration Playbook for Node Config (Non-Master Nodes)
 
 cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
-#!/usr/bin/ansible-playbook 
+#!/usr/bin/ansible-playbook
 - hosts: nodes:!masters
   serial: 1
   gather_facts: no
@@ -306,7 +305,7 @@ cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
           "subscriptionID" : "{{ g_subscriptionId }}",
           "tenantID" : "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
-        } 
+        }
     notify:
     - restart origin-node
   - name: insert the azure disk config into the node
@@ -392,13 +391,76 @@ openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
 # Enable HTPasswdPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
+# Enable API service auditing
+openshift_master_audit_config={"enabled": true}
+#
+# In case you want more advanced setup for the auditlog you can
+# use this line.
+# The directory in "auditFilePath" will be created if it's not
+# exist
+openshift_master_audit_config={"enabled": true, "auditFilePath": "/var/log/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": 14, "maximumFileSizeMegabytes": 500, "maximumRetainedFiles": 5}
+
+# Enable origin repos that point at Centos PAAS SIG, defaults to true, only used
+# by deployment_type=origin
+openshift_enable_origin_repo=true
+
+#####
+# Enable service catalog
+#openshift_enable_service_catalog=true
+
+# Enable template service broker (requires service catalog to be enabled, above)
+#template_service_broker_install=true
+
+# Configure one of more namespaces whose templates will be served by the TSB
+openshift_template_service_broker_namespaces=['openshift']
+
+# Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
+os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
+
+# Disable the OpenShift SDN plugin
+openshift_use_openshift_sdn=true
+
+#### enable extras
+#openshift_hosted_prometheus_deploy=true
+#openshift_prometheus_image_prefix: "openshift/"
+#openshift_prometheus_image_version: "v2.0.0-dev.3"
+#openshift_prometheus_proxy_image_version: "v1.0.0"
+#openshift_prometheus_alertmanager_image_version: "v0.9.1"
+#openshift_prometheus_alertbuffer_image_version: "v0.0.2"
+#openshift_prometheus_storage_volume_name=prometheus
+#openshift_prometheus_storage_volume_size=10Gi
+#openshift_prometheus_storage_labels={'storage': 'prometheus'}
+#openshift_prometheus_storage_type='pvc'
+#openshift_prometheus_alertmanager_storage_volume_name=prometheus-alertmanager
+#openshift_prometheus_alertmanager_storage_volume_size=10Gi
+#openshift_prometheus_alertmanager_storage_labels={'storage': 'prometheus-alertmanager'}
+#openshift_prometheus_alertmanager_storage_type='pvc'
+#openshift_prometheus_alertbuffer_storage_volume_name=prometheus-alertbuffer
+#openshift_prometheus_alertbuffer_storage_volume_size=10Gi
+#openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
+#openshift_prometheus_alertbuffer_storage_type='pvc'
+
+### Metrics #####
+
+openshift_metrics_install_metrics=true
+openshift_metrics_hawkular_hostname=metrics.$ROUTING
+openshift_metrics_cassandra_storage_type=dynamic
+
+
+### logging #####
+openshift_logging_install_logging=true
+openshift_logging_es_pvc_size=20Gi
+
+
+
+
 # host group for masters
 [masters]
 $MASTER-[0:${MASTERLOOP}]
 
 # host group for etcd
 [etcd]
-$MASTER-[0:${MASTERLOOP}] 
+$MASTER-[0:${MASTERLOOP}]
 
 [master0]
 $MASTER-0
@@ -439,19 +501,19 @@ EOF
 echo $(date) " - Cloning openshift-ansible repo for use in installation"
 runuser -l $SUDOUSER -c "git clone https://github.com/openshift/openshift-ansible /home/$SUDOUSER/openshift-ansible"
 
-echo $(date) " - Running network_manager.yml playbook" 
-DOMAIN=`domainname -d` 
+echo $(date) " - Running network_manager.yml playbook"
+DOMAIN=`domainname -d`
 
-# Setup NetworkManager to manage eth0 
-runuser -l $SUDOUSER -c "ansible-playbook openshift-ansible/playbooks/byo/openshift-node/network_manager.yml" 
+# Setup NetworkManager to manage eth0
+runuser -l $SUDOUSER -c "ansible-playbook openshift-ansible/playbooks/byo/openshift-node/network_manager.yml"
 
-echo $(date) " - Setting up NetworkManager on eth0" 
-# Configure resolv.conf on all hosts through NetworkManager 
+echo $(date) " - Setting up NetworkManager on eth0"
+# Configure resolv.conf on all hosts through NetworkManager
 
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\"" 
-sleep 5 
-runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\"" 
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\"" 
+runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
+sleep 5
+runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
+runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
