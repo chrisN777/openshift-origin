@@ -420,38 +420,29 @@ os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 # Disable the OpenShift SDN plugin
 openshift_use_openshift_sdn=true
 
-#### enable extras
-#openshift_hosted_prometheus_deploy=true
-#openshift_prometheus_image_prefix: "openshift/"
-#openshift_prometheus_image_version: "v2.0.0-dev.3"
-#openshift_prometheus_proxy_image_version: "v1.0.0"
-#openshift_prometheus_alertmanager_image_version: "v0.9.1"
-#openshift_prometheus_alertbuffer_image_version: "v0.0.2"
-#openshift_prometheus_storage_volume_name=prometheus
-#openshift_prometheus_storage_volume_size=10Gi
-#openshift_prometheus_storage_labels={'storage': 'prometheus'}
-#openshift_prometheus_storage_type='pvc'
-#openshift_prometheus_alertmanager_storage_volume_name=prometheus-alertmanager
-#openshift_prometheus_alertmanager_storage_volume_size=10Gi
-#openshift_prometheus_alertmanager_storage_labels={'storage': 'prometheus-alertmanager'}
-#openshift_prometheus_alertmanager_storage_type='pvc'
-#openshift_prometheus_alertbuffer_storage_volume_name=prometheus-alertbuffer
-#openshift_prometheus_alertbuffer_storage_volume_size=10Gi
-#openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
-#openshift_prometheus_alertbuffer_storage_type='pvc'
-
 ### Metrics #####
 
 openshift_metrics_install_metrics=true
 openshift_metrics_hawkular_hostname=metrics.$ROUTING
 openshift_metrics_cassandra_storage_type=dynamic
+openshift_metrics_cassandra_pvc_size=4Gi
+openshift_metrics_storage_volume_size=4Gi
+openshift_metrics_hawkular_nodeselector={"type":"infra"}
+openshift_metrics_cassandra_nodeselector={"type":"infra"}
+openshift_metrics_heapster_nodeselector={"type":"infra"}
+openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 
 ### logging #####
 openshift_logging_install_logging=true
-openshift_logging_es_pvc_size=20Gi
+openshift_logging_use_ops=true
+openshift_logging_es_pvc_size=10Gi
 
-
+openshift_logging_fluentd_nodeselector={"logging":"true"}
+openshift_logging_es_nodeselector={"type":"infra"}
+openshift_logging_kibana_nodeselector={"type":"infra"}
+openshift_logging_curator_nodeselector={"type":"infra"}
+openshift_logging_master_public_url=https://kibana.$ROUTING
 
 
 # host group for masters
