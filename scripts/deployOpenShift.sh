@@ -26,6 +26,9 @@ RESOURCEGROUP=${19}
 LOCATION=${20}
 STORAGEACCOUNT1=${21}
 SAKEY1=${22}
+OAUTHLOGINADAPPID=${23}
+OAUTHLOGINADAPPSECRET=${24}
+
 
 MASTERLOOP=$((MASTERCOUNT - 1))
 INFRALOOP=$((INFRACOUNT - 1))
@@ -390,6 +393,9 @@ openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
 
 # Enable HTPasswdPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+
+# Enable OAuth Provider
+openshift_master_identity_providers=[{'name': 'openid_connect_login', 'challenge': 'false', 'login': 'true', 'mappingMethod': 'claim', 'kind': 'OpenIDIdentityProvider', 'clientID': '$OAUTHLOGINADAPPID', 'clientSecret': '$OAUTHLOGINADAPPSECRET', 'claims': { 'id':['sub'], 'preferredUsername':['unique_name'], 'name':['name'], 'email':['email'] }, 'urls':{ 'authorize': 'https://login.microsoftonline.com/$TENANTID/oauth2/authorize', 'token': 'https://login.microsoftonline.com/$TENANTID/oauth2/token' }}]
 
 # Enable API service auditing
 openshift_master_audit_config={"enabled": true}

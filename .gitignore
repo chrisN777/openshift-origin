@@ -2,3 +2,4 @@
 
 *.local
 *.local.json
+azuredeploy.parameters.*.json

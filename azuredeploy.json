@@ -426,6 +426,20 @@
 			"metadata": {
 				"description": "Default Subdomain for application routing (Wildcard DNS) - must enter something even if you are using nip.io"
 			}
+		},
+		"oauthLoginAdAppId": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "OAuth Client Id used to configure Web Console Login"
+			}
+		},
+		"oauthLoginAdAppSecret": {
+			"type": "securestring",
+			"minLength": 1,
+			"metadata": {
+				"description": "OAuth Client Secret used to configure Web Console Login"
+			}
 		}
 	},
 	"variables": {
@@ -1689,6 +1703,12 @@
 							},
 							"secretName": "[parameters('keyVaultSecret')]"
 						}
+					},
+					"oauthLoginAdAppId": {
+						"value": "[parameters('oauthLoginAdAppId')]"
+					},
+					"oauthLoginAdAppSecret": {
+						"value": "[parameters('oauthLoginAdAppSecret')]"
 					}
 				}
 			}
