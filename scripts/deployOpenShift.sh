@@ -430,7 +430,6 @@ openshift_metrics_storage_volume_size=4Gi
 openshift_metrics_hawkular_nodeselector={"type":"infra"}
 openshift_metrics_cassandra_nodeselector={"type":"infra"}
 openshift_metrics_heapster_nodeselector={"type":"infra"}
-openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 
 ### logging #####
@@ -442,7 +441,7 @@ openshift_logging_fluentd_nodeselector={"logging":"true"}
 openshift_logging_es_nodeselector={"type":"infra"}
 openshift_logging_kibana_nodeselector={"type":"infra"}
 openshift_logging_curator_nodeselector={"type":"infra"}
-openshift_logging_master_public_url=https://kibana.$ROUTING
+
 
 
 # host group for masters
